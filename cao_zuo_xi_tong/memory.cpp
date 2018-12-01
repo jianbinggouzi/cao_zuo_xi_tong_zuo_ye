@@ -1,6 +1,16 @@
 #include "memery.h"
 memory::memory() {
-	
+	struct busy *now = list.busy;
+	struct busy *temp;
+	for (int i = 0; i < 512 / 8; i+init_size) {
+		now = new struct busy();
+		now->head = i;
+		now->size = init_size;
+		now->status = use_project;
+		temp = now->next;
+		now = temp;
+	}
+	now = NULL;
 }
 
 ;
