@@ -11,6 +11,7 @@ typedef struct _pcb { //pcb
 
 class com {
 public:
+	char mem[128][4]; //内存
 	int reg_1, reg_2, reg_3, reg_4; //四个寄存器
 	char *ir;//指令寄存器
 	typedef struct _pro_count { //程序计数器
