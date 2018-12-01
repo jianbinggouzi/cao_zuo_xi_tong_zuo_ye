@@ -1,7 +1,5 @@
 #include <stdio.h>
 
-
-
 class cpu {
 public:
 	

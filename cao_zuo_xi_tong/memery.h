@@ -17,4 +17,6 @@ public:
 			int status; //״̬
 		};
 	};
+
+
 };
