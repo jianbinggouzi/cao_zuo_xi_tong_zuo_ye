@@ -122,6 +122,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cpu.h" />
+    <ClInclude Include="memery.h" />
+    <ClInclude Include="os.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

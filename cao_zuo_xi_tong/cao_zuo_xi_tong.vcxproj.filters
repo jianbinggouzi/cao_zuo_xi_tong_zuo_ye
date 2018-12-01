@@ -23,5 +23,11 @@
     <ClInclude Include="cpu.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="memery.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="os.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
