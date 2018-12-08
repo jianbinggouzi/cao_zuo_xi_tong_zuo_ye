@@ -1,4 +1,5 @@
 #include "memery.h"
+
 memory::memory() {
 	struct busy *now = list.busy;
 	struct busy *temp;
