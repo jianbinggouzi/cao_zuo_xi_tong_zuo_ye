@@ -28,8 +28,8 @@ public:
 	mem_area list;
 
 	memory();
-	char *malloc(int size); //申请内存
-	void free(char *address); //释放内存
+	int malloc(int size,int pid); //申请内存
+	void free(int address); //释放内存
 	int mem_status(char *address); //
 	void write(char *address,char *str);
 	void read(char *address);
