@@ -24,10 +24,9 @@ typedef struct _mem_area { //内存分区表
 }mem_area;
 
 class memory {
-private:
+public:
 	char mem[init_mem_size]; //内存
 	mem_area list;
-public:
 	memory();
 	int malloc(int size,int pid); //申请内存
 	void free(int pid); //释放内存
