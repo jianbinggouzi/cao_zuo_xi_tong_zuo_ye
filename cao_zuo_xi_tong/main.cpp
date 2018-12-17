@@ -1,15 +1,13 @@
 #include <stdio.h>
 #include "memery.h"
+#include "file.h"
 int main() {
 	memory mem;
-	mem.malloc(3, 123);
-	mem.malloc(5, 123);
-	mem.malloc(10, 123);
-	mem.malloc(20, 123);
-	mem.malloc(20, 123);
-	mem.malloc(20, 123);
 	
-	mem.free_list();
-	mem.busy_list();
+	char *a = "1.txt";
+	file b;
+	b.load_file(a);
+
+
 	getchar();
 }
