@@ -18,22 +18,22 @@ struct free { //空闲分区表
 	struct free* next;
 };
 typedef struct _mem_area { //内存分区表
-	struct busy* busy;//使用链表
-	struct free* free;//空闲链表
+	struct busy* busy = NULL;//使用链表
+	struct free* free = NULL;//空闲链表
 	
 }mem_area;
 
 class memory {
-public:
+private:
 	char mem[init_mem_size]; //内存
 	mem_area list;
-
+public:
 	memory();
 	int malloc(int size,int pid); //申请内存
 	void free(int pid); //释放内存
 	int mem_status(int address); 
 	int write(int address,char *str);//-1为失败 1为成功
-	void read(int address);
+	char* read(int address); //返回地址对应的指针 null为失败
 	int length(int address);
 	int busy_list();
 	int free_list();

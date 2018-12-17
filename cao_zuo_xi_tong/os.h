@@ -8,7 +8,7 @@ typedef struct _pcb { //pcb
 	struct _pcb *next;
 }pcb;
 class os {
-public :
+private :
 	pcb* free_pcb; // 空白进程控制块链
 	pcb* ready_pcb; //就绪队列
 	pcb* block_pcb; //阻塞队列

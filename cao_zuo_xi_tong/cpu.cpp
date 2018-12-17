@@ -3,6 +3,7 @@
 #include<string>
 #include<stdio.h>
 #include<string.h>
+#include<tchar.h>
 
 using namespace std;
 
@@ -65,7 +66,7 @@ bool cpu::JudgeState()//判断是否存在中断
 void cpu::SaveState()//保存当前状态
 {
 	nir = new char[4];
-	strcpy(nir, ir);
+	_tcscpy(nir, ir);
 	ndr = dr;
 	npsw = psw;
 	np = pc;
@@ -73,7 +74,7 @@ void cpu::SaveState()//保存当前状态
 }
 void cpu::BakcState()
 {
-	strcpy(ir, nir);
+	_tcscpy(ir, nir);
 	dr = ndr;
 	psw = npsw;
 	pc = np;

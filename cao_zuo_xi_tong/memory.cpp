@@ -1,33 +1,37 @@
 #include "memery.h"
 
 memory::memory() {
-	struct free *now = list.free;
+	struct free *now;//新申请的free链表
 	struct free *temp;
 	for (int i = 0; i < init_mem_size; i++)
 		mem[i] = 0;
-	for (int i = 0; i < init_mem_size / init_size; i + init_size) {
-		now = new struct free();
-		now->head = i;
-		now->size = init_size;
-		now->status = use_project;
-		temp = now->next;
-		now = temp;
+	now = new struct free();
+	temp = now;
+	for (int i = 0; i < init_mem_size; i = i+init_size) {
+		temp->head = i;
+		temp->size = init_size;
+		temp->status = use_project;
+		if (i + init_size == init_mem_size) {
+			temp->next = NULL;
+			break;
+		}
+		temp->next = new struct free();
+		temp = temp->next;
+		
 	}
-	now = NULL;
-	list.busy = NULL;
 
+	//temp = NULL;
+	list.free = now;
+	list.busy = NULL;
 }
 
 ;
 //申请内存 大小 进程id
 int memory::malloc(int size, int pid)
 {
-	struct busy *busy_list = list.busy;//使用表项
-	struct free *free_list = list.free;//空闲表项
 	struct busy *temp = new struct busy();//新申请的内存块
 	struct free *free_prev = NULL;//记录上一指针
 	struct free *free_temp = NULL;//要做处理的空闲内存块
-	struct free *mini_free_prev = NULL; //临时添加
 	temp->next = NULL;
 	bool has_res = false;
 	for (struct free *i = list.free; i != NULL; i = i->next) { //寻找>=size的空闲内存块
@@ -41,6 +45,7 @@ int memory::malloc(int size, int pid)
 			if (i->size == size) { //size=当前空闲内存块大小，在链表中删除当前空闲内存块
 				if (free_prev == NULL) { //当前内存块在第0块
 					list.free = i->next;
+					
 				}
 				else { //不在第0快
 					free_prev->next = i->next;
@@ -50,28 +55,24 @@ int memory::malloc(int size, int pid)
 				i->head = i->head + size;
 				i->size = i->size - size;
 
-				//取出并重新按大小升序放入空闲链表
-				free_prev->next = i->next; 
+
+				//重新按大小升序放入空闲链表
 				free_temp = i;
 				for (struct free *j = list.free; j != NULL; j = j->next) {
-					if (free_temp->size < j->size) {
-						if (mini_free_prev == NULL) {
-							free_temp->next = list.free;
-							list.free = free_temp;
-						}
-						else {
-							free_temp->next = j;
-							mini_free_prev->next = free_temp;
-						}
+					if (free_temp == j) {
+						continue;
+					}
+					if (free_temp->size < j->size && free_temp != list.free) {
+						int temp = free_temp->head;
+						free_temp->head = j->head;
+						j->head = temp;
+						temp = free_temp->size;
+						free_temp->size = j->size;
+						j->size = temp;
 						free_temp = NULL;
 						break;
 							
 					}
-					mini_free_prev = j;
-				}
-				if (free_temp != NULL) {
-					free_temp->next = NULL;
-					mini_free_prev = free_temp;
 				}
 					
 			}
@@ -79,7 +80,10 @@ int memory::malloc(int size, int pid)
 		}
 		free_prev = i;
 	}
-	if (!has_res) return -1;//所有内存块大小都小于size，返回-1
+	if (!has_res) {
+		printf("memory::malloc:未找到适合大小\n");
+		return -1;
+	}//所有内存块大小都小于size，返回-1
 
 	//将新申请的内存块temp放入到使用表项
 	struct busy *p = list.busy;
@@ -205,21 +209,50 @@ int memory::write(int address, char * str)
 	}
 }
 
-void memory::read(int address)
+char* memory::read(int address)
 {
+	struct busy *temp = list.busy;
+	for (struct busy *i = temp; i != NULL; i = i->next) {
+		if (i->head <= address && i->head + i->size > address) {
+			if (i->head != address)
+				printf("memory::read：寻找地址的地址未对齐\n");
+			return mem + i->head;
+		}
+	}
+	printf("memory::read：寻找地址未找到\n");
+	return NULL;
 }
 
 int memory::length(int address)
 {
-	return 0;
+	struct busy *temp = list.busy;
+	for (struct busy *i = temp; i != NULL; i = i->next) {
+		if (i->head <= address && i->head + i->size > address) {
+			if (i->head != address)
+				printf("memory::length：寻找地址的地址未对齐\n");
+			return i->size;
+		}
+	}
+	printf("memory::length：寻找地址未找到\n");
+	return -1;
 }
 
 int memory::busy_list()
 {
+	printf("no\thead\tsize\tstatus\t\n");
+	struct busy *temp = list.busy;
+	for (struct busy *i = temp; i != NULL; i = i->next) {
+		printf("%d\t%d\t%d\t%d\t\n", i->no, i->head, i->size, i->status);
+	}
 	return 0;
 }
 
 int memory::free_list()
 {
+	printf("head\tsize\tstatus\t\n");
+	struct free *temp = list.free;
+	for (struct free *i = temp; i != NULL; i = i->next) {
+		printf("%d\t%d\t%d\t\n", i->head, i->size, i->status);
+	}
 	return 0;
 }

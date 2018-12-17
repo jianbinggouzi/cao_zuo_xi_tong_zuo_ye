@@ -1,4 +1,5 @@
 #include<stdio.h>
+#pragma warning(disable:4996)
 typedef struct _pro_count { //程序计数器
 	int pcb_no; //pcb编号
 	char *ir_index; //下一条指令位置
