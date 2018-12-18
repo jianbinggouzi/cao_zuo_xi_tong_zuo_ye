@@ -202,11 +202,14 @@ int memory::write(int address, char * str)
 				return -1;
 			}
 			for (int i = 0; i < Length(str); i++) {
-
+				mem[p1->head] = str[i];
 			}
+			return 1;
 
 		}
 	}
+	printf("memory::write:")
+	return -1;
 }
 
 char* memory::read(int address)

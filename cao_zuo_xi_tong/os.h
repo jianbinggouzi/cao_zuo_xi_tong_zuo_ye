@@ -21,7 +21,8 @@ typedef struct _pcb { //pcb
 	int surplus = TIME; //时间片 在就绪队列中表示剩余占用时间片 在阻塞队列中表示剩余阻塞时间
 }pcb;
 class os {
-private :
+//private :
+public:
 	pcb* free_pcb = NULL; // 空白进程控制块链
 	pcb* ready_pcb = NULL; //就绪队列
 	pcb* block_pcb = NULL; //阻塞队列
@@ -29,9 +30,12 @@ private :
 	int last_pid = 0; //最新的pid序号
 	int pid_num = 0; //pid个数
 	memory *mem = NULL;
-public:
+
 	os(memory *_mem); //完成初始化
-	int add_process(char *irs,int size); //添加新进程 irs为指令起始地址，size为所需内存大小
+	int add_process(char *irs,int size); //添加新进程 irs为指令起始地址，size为所需内存大小 返回pid
 	void dispatch(); //调度
-	
+	int add_block_process(pcb* _pcb,int reason,int time); //添加阻塞进程 dispatch()中调用 pcb快地址 原因 阻塞时间 -1失败 1成功
+	int move_block_process(pcb* _pcb); //从阻塞队列取出 -1失败 1成功
+	void show_all_ready();
+	void show_all_block();
 };
