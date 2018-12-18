@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "file.h"
+
 #include "os.h"
 struct test {
 	int n;
@@ -40,12 +40,12 @@ int main() {
 	memory mem;
 	
 	os _os(&mem);
-	_os.add_process(NULL, 2);
-	_os.add_process(NULL, 7);
-	_os.add_process(NULL, 16);
 	_os.add_process(NULL, 20);
-	_os.add_process(NULL, 13);
-	_os.add_process(NULL, 24);
+	_os.add_process(NULL, 20);
+	_os.add_process(NULL, 20);
+	_os.add_process(NULL, 20);
+	_os.add_process(NULL, 20);
+	_os.add_process(NULL, 20);
 	
 	pcb *p = _os.ready_pcb,*temp=NULL;
 	if (p == NULL) printf("ready_pcb is null\n");

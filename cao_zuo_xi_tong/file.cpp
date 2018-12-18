@@ -26,7 +26,11 @@ char** file::load_files(char * names[_MAX_PATH], int n)
 
 char * file::load_file(char * name)
 {
-	ifstream in(name);
+	char _name[_MAX_PATH];
+	memset(_name, 0, _MAX_PATH);
+	strcat_s(_name, "ir_files\\");
+	strcat_s(_name, name);
+	ifstream in(_name);
 	char buffer[BUFFER_SIZE];
 	int length = 0;
 	memset(buffer, 0, BUFFER_SIZE);
@@ -36,9 +40,12 @@ char * file::load_file(char * name)
 		}
 	}
 	else {
-		printf("file::load_files:打开%s出错\n", name);
+		printf("file::load_file:打开%s出错\n", name);
 	}
-	printf("%s", buffer);
 	in.close();
-	return buffer;
+	char *res = new char[length];
+	for (int i = 0; i < length; i++)
+		res[i] = buffer[i];
+	//printf("%s\n", res);
+	return res;
 }

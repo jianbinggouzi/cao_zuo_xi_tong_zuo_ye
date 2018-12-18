@@ -207,8 +207,9 @@ int memory::write(int address, char * str)
 			return 1;
 
 		}
+		p1 = p1->next;
 	}
-	printf("memory::write:")
+	printf("memory::write:list.busyÎª¿Õ");
 	return -1;
 }
 
