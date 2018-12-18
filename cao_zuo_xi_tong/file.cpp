@@ -43,9 +43,10 @@ char * file::load_file(char * name)
 		printf("file::load_file:´ò¿ª%s³ö´í\n", name);
 	}
 	in.close();
-	char *res = new char[length];
+	char *res = new char[length+1];
 	for (int i = 0; i < length; i++)
 		res[i] = buffer[i];
+	res[length] = 0;
 	//printf("%s\n", res);
 	return res;
 }

@@ -6,15 +6,19 @@ os::os(memory *_mem)
 	mem = _mem;
 	//为闲逛进程申请内存
 	int address = mem->malloc(8, last_pid);
+	printf("闲逛进程address值:%d\n",address);
 	char idle[] = "x=0;gob;";
+	printf("---------%d\n", sizeof(idle));
 	if (mem->write(address, idle) == 1) {
 		printf("闲逛进程写入成功\n");
 	}
+	printf("闲逛进程内存块内容:%s\n", (mem->mem) + address);
 	//添加闲逛进程
 	ready_pcb = new pcb();
 	ready_pcb->pid = last_pid++;
 	ready_pcb->data_reg = 0;
 	ready_pcb->ir_reg = mem->mem + address;
+	printf("创建时ir_reg=%d\n", ready_pcb->ir_reg);
 	ready_pcb->status = READY;
 	ready_pcb->reason = NO_BLOCK;
 	ready_pcb->next = NULL;
@@ -60,7 +64,7 @@ int os::add_process(char * irs,int size)
 
 void os::dispatch()
 {
-	//将阻塞队列内所有pcb时间片-1 如果阻塞时间片用完 加入到ready队列中
+	//将阻塞队列内所有pcb时间片-1 如果阻塞时间片用完 唤醒该进程
 	pcb* p = block_pcb;
 	while (p != NULL) {
 		p->surplus--;
@@ -76,8 +80,17 @@ void os::dispatch()
 		run_pcb->status = RUN;
 	}
 	
+	//时间片-1
 	run_pcb->surplus--;
-	//检查当前的pcb是否被cpu设置为阻塞状态 如果有 加入到阻塞队列并立即调度
+	//一次读取一条指令
+	注意这里 是一次一条并后移 不要犯昨晚的错误
+	read_id_reg();
+	read_id_reg();
+	read_id_reg();
+	read_id_reg();
+	read_id_reg();
+
+	//检查当前的pcb是否被cpu设置为中断状态 如果有 加入到阻塞队列并立即调度
 	if (run_pcb->status == BLOCK) {
 		add_block_process(run_pcb, run_pcb->reason, run_pcb->surplus);
 		run_pcb = run_pcb->next;
@@ -192,6 +205,29 @@ void os::show_all_block()
 		printf("pid:%d,address:%p,time:%d\n", p->pid, p->ir_reg,p->surplus);
 		p = p->next;
 	}
+}
+
+char * os::read_id_reg()
+{
+	printf("当前读取指令的pid:%d ir_reg位置:%d\n", run_pcb->pid,run_pcb->ir_reg);
+	int length = 1;
+	while (*(run_pcb->ir_reg + length -1) != ';') {
+		
+		length++;
+	}
+	char *res = new char[length];
+	for (int i = 0; i < length; i++) {
+		res[i] = *(run_pcb->ir_reg + i);
+	}
+	run_pcb->ir_reg = run_pcb->ir_reg + length;
+	
+	char temp[10];
+	for (int i = 0; i < length; i++) {
+		temp[i] = res[i];
+	}
+	printf("%s\n", temp);
+	return res;
+
 }
 
 

@@ -185,15 +185,16 @@ int memory::mem_status(int address)
 
 }
 
-int memory::Length(char *address) {
-	/*for (int i = 0; i < sizeof(address); i++)
-		if (address[i] == 0)
-			return i;*/
-	return sizeof(address);
+int memory::Length(char *str) {
+	for (int i = 0; ; i++)
+		if (str[i] == 0)
+			return i;
+	//return sizeof(str);
 }
 
 int memory::write(int address, char * str)
 {
+	printf("传入的str:%s 长度%d", str, Length(str));
 	struct busy *p1 = list.busy;
 	while (p1 != NULL) {
 		if (p1->head == address) {
@@ -202,7 +203,8 @@ int memory::write(int address, char * str)
 				return -1;
 			}
 			for (int i = 0; i < Length(str); i++) {
-				mem[p1->head] = str[i];
+				if (str[i] == 0) break;
+				mem[p1->head+i] = str[i];
 			}
 			return 1;
 

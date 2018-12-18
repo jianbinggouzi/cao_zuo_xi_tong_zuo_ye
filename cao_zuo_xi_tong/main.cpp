@@ -81,6 +81,10 @@ int main() {
 	_os.show_all_ready();
 	_os.show_all_block();
 	mem.busy_list();
-	
+	_os.dispatch();
+	printf("all:\n");
+	for (int i = 0; i < 512; i++) {
+		printf("%c",mem.mem[i]);
+	}
 	getchar();
 }

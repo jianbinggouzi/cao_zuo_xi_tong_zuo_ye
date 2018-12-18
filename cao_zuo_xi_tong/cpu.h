@@ -1,4 +1,5 @@
-#include<stdio.h>
+#include <stdio.h>
+#include "os.h"
 #pragma warning(disable:4996)
 typedef struct _pro_count { //程序计数器
 	int pcb_no; //pcb编号
@@ -9,42 +10,17 @@ typedef struct _pro_count { //程序计数器
 
 
 class cpu {
-public:
-
+private:
 	int reg_1, reg_2, reg_3, reg_4; //四个寄存器
-	int psw;//程序状态寄存器
-	int time;//时间片寄存器
-	char *ir;//指令寄存器
-	int ndr, npsw, nti;
-	pro_count np;
-	char *nir;
-
-	//char *nir;
-	pro_count pc;//程序计数器
+	int psw;//程序状态寄存器 临时存放当前pcb的status
+	char *ir;//指令寄存器 临时保存当前执行的指令
+	pcb* pcb_now; //程序计数器的一部分 临时存放当前执行的pcb 为了方便 改用指针
+	int ir_index; //程序计数器的一部分 临时存放当前指令在内存块的位置
 	int dr; //数据寄存器 存放x
-	cpu();
-	int GetTime();//获得当前时间片
-	int GetPsw();//获得psw
-	char* GetIr();//获得Ir
-	void SetTime(int t);//设置时间片寄存器
-	void SetPsw(int p);//设置psw寄存器
-	void SetIr(char a[], int n);//设置Ir寄存器
-
-
-
-	void DisposeIR();
-	bool JudgeState();
-
-	void SetInterrupt(int p);//设置中断
-	void ClearInterrupt();//清理中断
-	void DealInterrupt();//处理中断
-	void DealIointer();//处理Io中断
-	void DealSoftint();//处理软中断
-	void DealTimeint();//处理时间中断
-
-
-	void SaveState();
-	void BakcState();//中断后恢复状态
+	bool if_start = true; //true为开机 false为关机
+public:
+	cpu(); //构造函数 cpu实例化后执行其中的循环，直到开机状态失效后跳出循环
+	void set_computer_status(bool if_run);
 
 
 };

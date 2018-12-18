@@ -15,7 +15,7 @@ constexpr auto TIME = 2;
 typedef struct _pcb { //pcb
 	int pid; //ID
 	int data_reg; // 数据寄存器主要内容
-	char * ir_reg; //指令寄存器主要内容
+	char * ir_reg; //指令寄存器指针 指向内存块起始地址 随着进程的运行逐步后移
 	int status; //状态 
 	char reason; //阻塞原因
 	struct _pcb *next;
@@ -39,4 +39,5 @@ public:
 	void set_now_process_status(int _status, int _reason, int _time); //设置当前运行的进程状态 实际使用中只用来供cpu调用设置成阻塞状态
 	void show_all_ready();
 	void show_all_block();
+	char *read_id_reg(); //读取指令 从ir_reg开始读到 ; 并设置ir_reg后移 返回值为指令内容 注意无结束符0 所以用sizeof()判断长度
 };
