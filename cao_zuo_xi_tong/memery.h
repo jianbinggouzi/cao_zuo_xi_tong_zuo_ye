@@ -1,5 +1,5 @@
 #include <stdio.h>
-constexpr auto init_mem_size = 512;//初始内存大小
+constexpr auto init_mem_size = 1024;//初始内存大小
 constexpr auto init_size = 32; //初始化时每个空闲分区
 constexpr auto null_project =  0; //空表项标志
 constexpr auto use_project =  1; //已分配标志

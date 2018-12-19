@@ -64,6 +64,8 @@ int os::add_process(char * irs,int size)
 
 void os::dispatch()
 {
+	show_all_ready();
+	show_all_block();
 	//将阻塞队列内所有pcb时间片-1 如果阻塞时间片用完 唤醒该进程
 	pcb* p = block_pcb;	
 	while (p != NULL) {
@@ -73,7 +75,15 @@ void os::dispatch()
 		}
 		p = p->next;
 	}
-
+	//检查当前的pcb中是否有被cpu设置为完成状态 如果有 从就绪队列中删除
+	pcb *p1 = ready_pcb;
+	while (p1->next != NULL) {
+		if (p1->status == FINISH) {
+			move_finished_process(p1);
+			
+		}
+		p1 = p1->next;
+	}
 	
 	//时间片-1
 	run_pcb->surplus--;
@@ -81,35 +91,11 @@ void os::dispatch()
 	run_pcb->ir = read_id_reg();
 	if (run_pcb->pid == 0) {
 		run_pcb->ir = mem->mem + 0;
+		run_pcb->ir_reg = mem->mem + 0;
 	}
-	printf("pid:%d读取到指令%s\n",run_pcb->pid, run_pcb->ir);
-	
+	printf("pid:%d读取到指令%s\n",run_pcb->pid, run_pcb->ir);		
 
 	
-
-	//检查当前的pcb是否被cpu设置为完成状态 如果有 从就绪队列中删除
-	if (run_pcb->status == FINISH) {
-		printf("----------------------\n");
-		move_finished_process(run_pcb);
-		run_pcb = run_pcb->next;
-		if (run_pcb == NULL) {
-			run_pcb = ready_pcb;
-			run_pcb->status = RUN;
-		}
-		return;
-	}
-
-	//如果没有堵塞 继续检查时间片是否用完 如果用完 run_pcb指向下一个pcb 
-	if (run_pcb->surplus == 0) {
-		run_pcb->surplus = TIME;
-		run_pcb = run_pcb->next;
-	}
-
-	//如果到达准备序列结尾 从头开始
-	if (run_pcb == NULL) {
-		run_pcb = ready_pcb;
-		run_pcb->status = RUN;
-	}
 
 }
 
@@ -130,7 +116,7 @@ int os::move_finished_process(pcb* _pcb)
 		}
 		pcb* temp = p->next;
 		p->next = p->next->next;
-		delete[] temp;
+
 	}
 	return 1;
 }
@@ -142,6 +128,7 @@ pcb * os::get_running_pcb()
 
 int os::add_block_process(pcb* _pcb,int reason,int time)
 {
+	printf("添加pid=%d 到阻塞中,time=%d\n", _pcb->pid, time);
 	pcb *p = ready_pcb;
 	int if_find = -1;
 	while (p->next != NULL) {
@@ -173,13 +160,13 @@ int os::add_block_process(pcb* _pcb,int reason,int time)
 		}
 		p->next = _pcb;
 	}
-	show_all_ready();
-	show_all_block();
+	
 	return 1;
 }
 
 int os::move_block_process(pcb * _pcb)
 {
+	printf("从阻塞队列中移除pid=%d\n", _pcb->pid);
 	int if_find = -1;
 	pcb *p = block_pcb;
 	if (p == NULL) {
@@ -238,7 +225,7 @@ void os::show_all_block()
 	pcb *p = block_pcb;
 	printf("block:\n");
 	while (p != NULL) {
-		printf("pid:%d,address:%p,time:%d\n", p->pid, p->ir_reg,p->surplus);
+		printf("pid:%d,address:%p,status:%d,time:%d\n", p->pid, p->ir_reg,p->status,p->surplus);
 		p = p->next;
 	}
 }
@@ -246,7 +233,13 @@ void os::show_all_block()
 char * os::read_id_reg()
 {
 	int length = 1;
-	if (run_pcb->pid == 0)  return NULL;
+	if (run_pcb->pid == 0) {
+		char t[] = "x=0;";
+		return t;
+	}
+	show_all_ready();
+	show_all_block();
+	printf("pid = %d-----------------\n", run_pcb->pid);
 	while (*(run_pcb->ir_reg + length -1) != ';') {
 		length++;
 	}

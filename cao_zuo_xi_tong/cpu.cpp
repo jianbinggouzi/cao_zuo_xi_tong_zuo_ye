@@ -30,11 +30,9 @@ void cpu::run()
 void cpu::do_ir()
 {
 	pcb_now = _os->get_running_pcb();
-	if (pcb_now->pid == 0) {
-		return;
-	}
+	
 	ir = pcb_now->ir;
-	printf("处理指令:%s\n", ir);
+	printf("处理pid=%d 指令:%s\n",pcb_now->pid, ir);
 	if (ir == NULL) return; //刚开机
 	ir_reg = pcb_now->ir_reg;
 	if (strcmp(ir, "x++;") == 0) {
@@ -63,6 +61,19 @@ void cpu::do_ir()
 		else {
 			printf("cpu无法识别指令:%s\n", ir);
 		}
+	}
+
+
+	//如果时间片用完或发生阻塞，指向下一个块 重新调度 
+	if ((_os->run_pcb)->surplus == 0 || (_os->run_pcb)->status == BLOCK) {
+		(_os->run_pcb)->surplus = TIME;
+		(_os->run_pcb) = (_os->run_pcb)->next;
+	}
+
+	//如果到达准备序列结尾 从头开始
+	if ((_os->run_pcb) == NULL) {
+		(_os->run_pcb) = _os->ready_pcb;
+		(_os->run_pcb)->status = RUN;
 	}
 }
 
