@@ -65,7 +65,7 @@ int os::add_process(char * irs,int size)
 void os::dispatch()
 {
 	//将阻塞队列内所有pcb时间片-1 如果阻塞时间片用完 唤醒该进程
-	pcb* p = block_pcb;
+	pcb* p = block_pcb;	
 	while (p != NULL) {
 		p->surplus--;
 		if (p->surplus <= 0) {
@@ -74,34 +74,70 @@ void os::dispatch()
 		p = p->next;
 	}
 
-	//如果到达准备序列结尾 从头开始
-	if (run_pcb == NULL) {
-		run_pcb = ready_pcb;
-		run_pcb->status = RUN;
-	}
 	
 	//时间片-1
 	run_pcb->surplus--;
 	//一次读取一条指令
-	注意这里 是一次一条并后移 不要犯昨晚的错误
-	read_id_reg();
-	read_id_reg();
-	read_id_reg();
-	read_id_reg();
-	read_id_reg();
+	run_pcb->ir = read_id_reg();
+	if (run_pcb->pid == 0) {
+		run_pcb->ir = mem->mem + 0;
+	}
+	printf("pid:%d读取到指令%s\n",run_pcb->pid, run_pcb->ir);
+	
 
-	//检查当前的pcb是否被cpu设置为中断状态 如果有 加入到阻塞队列并立即调度
-	if (run_pcb->status == BLOCK) {
-		add_block_process(run_pcb, run_pcb->reason, run_pcb->surplus);
+	
+
+	//检查当前的pcb是否被cpu设置为完成状态 如果有 从就绪队列中删除
+	if (run_pcb->status == FINISH) {
+		printf("----------------------\n");
+		move_finished_process(run_pcb);
 		run_pcb = run_pcb->next;
+		if (run_pcb == NULL) {
+			run_pcb = ready_pcb;
+			run_pcb->status = RUN;
+		}
 		return;
 	}
+
 	//如果没有堵塞 继续检查时间片是否用完 如果用完 run_pcb指向下一个pcb 
 	if (run_pcb->surplus == 0) {
 		run_pcb->surplus = TIME;
 		run_pcb = run_pcb->next;
 	}
 
+	//如果到达准备序列结尾 从头开始
+	if (run_pcb == NULL) {
+		run_pcb = ready_pcb;
+		run_pcb->status = RUN;
+	}
+
+}
+
+int os::move_finished_process(pcb* _pcb)
+{
+	printf("pid:%d完成\n", _pcb->pid);
+	if (_pcb == ready_pcb) {
+		ready_pcb = ready_pcb->next;
+	}
+	else {
+		pcb* p = ready_pcb;
+		while (p->next != _pcb) {
+			if (p->next == NULL) {
+				printf("os::move_finished_process:未在ready中找到pid=%d\n", _pcb->pid);
+				return -1;
+			}
+			p = p->next;
+		}
+		pcb* temp = p->next;
+		p->next = p->next->next;
+		delete[] temp;
+	}
+	return 1;
+}
+
+pcb * os::get_running_pcb()
+{
+	return run_pcb;
 }
 
 int os::add_block_process(pcb* _pcb,int reason,int time)
@@ -118,7 +154,7 @@ int os::add_block_process(pcb* _pcb,int reason,int time)
 		p = p->next;
 	}
 	if (if_find == -1) {
-		printf("os::add_block_process:未找到对应pcb\n");
+		printf("os::add_block_process:未找到对应pcb:%d\n",_pcb->pid);
 		return -1;
 	}
 	
@@ -137,7 +173,8 @@ int os::add_block_process(pcb* _pcb,int reason,int time)
 		}
 		p->next = _pcb;
 	}
-	
+	show_all_ready();
+	show_all_block();
 	return 1;
 }
 
@@ -149,23 +186,20 @@ int os::move_block_process(pcb * _pcb)
 		printf("os::move_block_process:阻塞队列为空\n");
 		return -1;
 	}
-	//阻塞队列只有一个块
-	if (p->next == NULL) {
-		if (p != _pcb) {
-			printf("os::move_block_process:未找到对应pcb\n");
-			return -1;
-		}
+	
+	//_pcb位于第一位
+	if (_pcb == block_pcb) {
+		block_pcb = block_pcb->next;
 	}
-	//大于1个
 	else {
-		while (p->next != NULL) {
-			if (p->next == _pcb) {
-				p->next = p->next->next;
-				if_find = 1;
-				break;
+		while (p->next != _pcb) {
+			if (p->next == NULL || p == NULL) {
+				printf("os::move_block_process:未在阻塞队列中找到pid=%d\n", _pcb->pid);
+				return -1;
 			}
 			p = p->next;
 		}
+		p->next = p->next->next;
 	}
 	
 	p = ready_pcb;
@@ -177,6 +211,8 @@ int os::move_block_process(pcb * _pcb)
 	_pcb->surplus = TIME;
 	_pcb->next = NULL;
 	p->next = _pcb;
+	
+
 	return 1;
 }
 
@@ -192,7 +228,7 @@ void os::show_all_ready()
 	pcb *p = ready_pcb;
 	printf("ready:\n");
 	while (p != NULL) {
-		printf("pid:%d,address:%p,time:%d\n", p->pid,p->ir_reg,p->surplus);
+		printf("pid:%d,address:%p,time:%d, status%d\n", p->pid,p->ir_reg,p->surplus,p->status);
 		p = p->next;
 	}
 }
@@ -209,10 +245,9 @@ void os::show_all_block()
 
 char * os::read_id_reg()
 {
-	printf("当前读取指令的pid:%d ir_reg位置:%d\n", run_pcb->pid,run_pcb->ir_reg);
 	int length = 1;
+	if (run_pcb->pid == 0)  return NULL;
 	while (*(run_pcb->ir_reg + length -1) != ';') {
-		
 		length++;
 	}
 	char *res = new char[length];
@@ -221,12 +256,12 @@ char * os::read_id_reg()
 	}
 	run_pcb->ir_reg = run_pcb->ir_reg + length;
 	
-	char temp[10];
+	char *temp = new char[length+1];
+	memset(temp, 0, length+1);
 	for (int i = 0; i < length; i++) {
 		temp[i] = res[i];
 	}
-	printf("%s\n", temp);
-	return res;
+	return temp;
 
 }
 

@@ -1,7 +1,5 @@
-#include <stdio.h>
 
-
-#include "os.h"
+#include "cpu.h"
 struct test {
 	int n;
 	struct test* next;
@@ -38,8 +36,8 @@ void test() {
 }
 int main() {
 	memory mem;
-	
 	os _os(&mem);
+
 	_os.add_process(NULL, 20);
 	_os.add_process(NULL, 20);
 	_os.add_process(NULL, 20);
@@ -47,41 +45,16 @@ int main() {
 	_os.add_process(NULL, 20);
 	_os.add_process(NULL, 20);
 	
-	pcb *p = _os.ready_pcb,*temp=NULL;
-	if (p == NULL) printf("ready_pcb is null\n");
-	while (p->next != NULL) {
-		if (p->pid == 2 ) {
-			temp = p;
-			_os.add_block_process(temp, A, 3);
-			break;
-		}
-		p = p->next;
+	cpu _cpu;
+	_cpu.set_computer_status(true, &_os);
+	if (_cpu.get_status()) {
+		printf("开机完成");
+		_cpu.run();
 	}
 
-	p = _os.ready_pcb;
-	while (p->next != NULL) {
-		if (p->pid == 3) {
-			temp = p;
-			_os.add_block_process(temp, A, 3);
-			break;
-		}
-		p = p->next;
-	}
+	
 
-	p = _os.block_pcb;
-	while (p != NULL) {
-		if (p->pid == 3) {
-			temp = p;
-			_os.move_block_process(temp);
-			break;
-		}
-		p = p->next;
-	}
 
-	_os.show_all_ready();
-	_os.show_all_block();
-	mem.busy_list();
-	_os.dispatch();
 	printf("all:\n");
 	for (int i = 0; i < 512; i++) {
 		printf("%c",mem.mem[i]);

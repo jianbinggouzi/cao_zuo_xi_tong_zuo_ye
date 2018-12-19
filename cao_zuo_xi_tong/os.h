@@ -5,17 +5,21 @@
 constexpr auto READY = 0;
 constexpr auto BLOCK = 1;
 constexpr auto RUN = 3;
+constexpr auto FINISH = 7;
 //阻塞原因
 constexpr auto A = 4;
 constexpr auto B = 5;
 constexpr auto NO_BLOCK = 6;
+constexpr auto END = 8;
 //默认每个进程执行的时间片
 constexpr auto TIME = 2;
 
 typedef struct _pcb { //pcb
 	int pid; //ID
 	int data_reg; // 数据寄存器主要内容
-	char * ir_reg; //指令寄存器指针 指向内存块起始地址 随着进程的运行逐步后移
+	char *ir = NULL; //当前执行指令寄存器 
+	char * ir_reg; //下一条指令寄存器  
+	
 	int status; //状态 
 	char reason; //阻塞原因
 	struct _pcb *next;
@@ -40,4 +44,6 @@ public:
 	void show_all_ready();
 	void show_all_block();
 	char *read_id_reg(); //读取指令 从ir_reg开始读到 ; 并设置ir_reg后移 返回值为指令内容 注意无结束符0 所以用sizeof()判断长度
+	int move_finished_process(pcb* _pcb); //从ready中删除已完成进程
+	pcb* get_running_pcb(); //返回当前pcb指针
 };
