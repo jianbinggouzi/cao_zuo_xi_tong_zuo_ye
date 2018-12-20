@@ -25,11 +25,13 @@ void cpu::run()
 		
 		do_ir();
 		_os->dispatch();
+		if (if_start == false) break;
 	}
 }
 
 void cpu::do_ir()
 {
+	cpu_time = (cpu_time++) % 5;
 	pcb_now = _os->get_running_pcb();
 	pcb *next = (_os->run_pcb)->next;
 	ir = pcb_now->ir;
@@ -66,7 +68,7 @@ void cpu::do_ir()
 			printf("cpu无法识别指令:%s\n", ir);
 		}
 	}
-
+	dr = pcb_now->data_reg;
 	
 	//如果时间片用完或发生阻塞，指向下一个块 重新调度 
 	if ((_os->run_pcb)->surplus == 0 || (_os->run_pcb)->status == BLOCK || (_os->run_pcb)->status == FINISH) {
@@ -75,11 +77,35 @@ void cpu::do_ir()
 		(_os->run_pcb) = next;
 	}
 
-	//如果到达准备序列结尾 从头开始
+	//如果到达准备序列结尾 从头开始 如果有其他进程 调度其他进程 否则运行闲逛进程
 	if ((_os->run_pcb) == NULL) {
 		(_os->run_pcb) = _os->ready_pcb;
+		
 		(_os->run_pcb)->status = RUN;
 	}
+	_sleep(100);
 }
+
+pcb * cpu::get_now_pcb()
+{
+	return pcb_now;
+}
+
+int cpu::get_cpu_time()
+{
+	return cpu_time;
+}
+
+char * cpu::get_ir()
+{
+	return ir;
+}
+
+int cpu::get_dr()
+{
+	return dr;
+}
+
+
 
 

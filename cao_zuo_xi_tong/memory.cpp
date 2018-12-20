@@ -109,6 +109,7 @@ int memory::malloc(int size, int pid)
 
 void memory::free(int pid)
 {
+	printf("free is running++++++++++++++++++++++++++++++\n");
 	struct busy *p = list.busy;
 	struct free *p2 = list.free;
 	struct busy *busy_temp = NULL;
@@ -131,12 +132,12 @@ void memory::free(int pid)
 		//上边界重合
 		if (p2->next->head + p2->next->size == busy_temp->head) {
 			busy_temp->head = p2->next->head;
-			busy_temp->size = p2->next->size;
+			busy_temp->size = p2->next->size+busy_temp->size;
 			//断链
 			p2->next = p2->next->next;
 		}
 		//下边界重合
-		if (busy_temp->head + busy_temp->size == p2->next->head) {
+		else if (busy_temp->head + busy_temp->size == p2->next->head) {
 			busy_temp->size = busy_temp->size + p2->next->size;
 
 			p2->next = p2->next->next;
@@ -245,7 +246,7 @@ int memory::length(int address)
 
 int memory::busy_list()
 {
-	printf("no\thead\tsize\tstatus\t\n");
+	printf("busy:\nno\thead\tsize\tstatus\t\n");
 	struct busy *temp = list.busy;
 	for (struct busy *i = temp; i != NULL; i = i->next) {
 		printf("%d\t%d\t%d\t%d\t\n", i->no, i->head, i->size, i->status);

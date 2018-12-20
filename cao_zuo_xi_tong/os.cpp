@@ -39,7 +39,7 @@ int os::add_process(int size)
 	//向内存中写入指令
 	char filename[10];
 	memset(filename, 0, 10);
-	sprintf_s(filename, "%d.c", last_pid);
+	sprintf_s(filename, "%d.c", last_pid>10?(last_pid%10==0?(1):(last_pid%10)):(last_pid));
 	if (mem->write(address, (new file)->load_file(filename)) == -1) {
 		printf("载入新进程文件失败\n");
 		mem->free(last_pid);
@@ -67,6 +67,9 @@ void os::dispatch()
 	show_all_ready();
 	show_all_block();
 	show_all_finish();
+	mem->busy_list();
+	mem->free_list();
+
 	//将阻塞队列内所有pcb时间片-1 如果阻塞时间片用完 唤醒该进程
 	pcb* p = block_pcb;	
 	while (p != NULL) {
@@ -124,6 +127,10 @@ int os::move_finished_process(pcb* _pcb)
 		p->next = p->next->next;
 
 	}
+
+	//释放内存
+	mem->free(_pcb->pid);
+
 
 	//添加到完成队列
 	pcb *p1 = finish_pcb;
