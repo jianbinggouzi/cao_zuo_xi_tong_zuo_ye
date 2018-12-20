@@ -27,7 +27,7 @@ os::os(memory *_mem)
 	//初始化后 闲逛进程永远处于就绪队列第一位 删除进程时也不会删除闲逛进程
 }
 
-int os::add_process(char * irs,int size)
+int os::add_process(int size)
 {
 	pcb *p = ready_pcb;
 	while (p->next != NULL) {
@@ -69,16 +69,21 @@ void os::dispatch()
 	//将阻塞队列内所有pcb时间片-1 如果阻塞时间片用完 唤醒该进程
 	pcb* p = block_pcb;	
 	while (p != NULL) {
+		printf("检查阻塞：当前pid = %d .time = %d", p->pid, p->surplus);
 		p->surplus--;
+		printf("--------------\n");
 		if (p->surplus <= 0) {
+			printf("发现pid = %d时间片用完", p->pid);
 			move_block_process(p);
 		}
+
 		p = p->next;
 	}
 	//检查当前的pcb中是否有被cpu设置为完成状态 如果有 从就绪队列中删除
 	pcb *p1 = ready_pcb;
-	while (p1->next != NULL) {
+	while (p1 != NULL) {
 		if (p1->status == FINISH) {
+			printf("发现一个完成 pid= %d\n", p1->pid);
 			move_finished_process(p1);
 			
 		}
@@ -126,9 +131,9 @@ pcb * os::get_running_pcb()
 	return run_pcb;
 }
 
-int os::add_block_process(pcb* _pcb,int reason,int time)
+int os::add_block_process(pcb* _pcb,int reason,int _time)
 {
-	printf("添加pid=%d 到阻塞中,time=%d\n", _pcb->pid, time);
+	printf("添加pid=%d 到阻塞中,time=%d\n", _pcb->pid, _time);
 	pcb *p = ready_pcb;
 	int if_find = -1;
 	while (p->next != NULL) {
@@ -146,7 +151,7 @@ int os::add_block_process(pcb* _pcb,int reason,int time)
 	}
 	
 	_pcb->reason = reason;
-	_pcb->surplus = time;
+	_pcb->surplus = _time;
 	_pcb->status = BLOCK;
 	_pcb->next = NULL;
 	//添加到block_pcb中

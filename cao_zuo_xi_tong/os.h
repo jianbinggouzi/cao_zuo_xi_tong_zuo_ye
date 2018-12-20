@@ -36,9 +36,9 @@ public:
 	memory *mem = NULL;
 
 	os(memory *_mem); //完成初始化
-	int add_process(char *irs,int size); //添加新进程 irs为指令起始地址，size为所需内存大小 返回pid
+	int add_process(int size); //添加新进程 size为所需内存大小 返回pid
 	void dispatch(); //调度
-	int add_block_process(pcb* _pcb,int reason,int time); //添加阻塞进程 dispatch()中调用 pcb快地址 原因 阻塞时间 -1失败 1成功
+	int add_block_process(pcb* _pcb,int reason,int _time); //添加阻塞进程 dispatch()中调用 pcb快地址 原因 阻塞时间 -1失败 1成功
 	int move_block_process(pcb* _pcb); //从阻塞队列取出 -1失败 1成功
 	void set_now_process_status(int _status, int _reason, int _time); //设置当前运行的进程状态 实际使用中只用来供cpu调用设置成阻塞状态
 	void show_all_ready();

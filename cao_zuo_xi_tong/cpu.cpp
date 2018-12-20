@@ -30,7 +30,7 @@ void cpu::run()
 void cpu::do_ir()
 {
 	pcb_now = _os->get_running_pcb();
-	
+	pcb *next = (_os->run_pcb)->next;
 	ir = pcb_now->ir;
 	printf("处理pid=%d 指令:%s\n",pcb_now->pid, ir);
 	if (ir == NULL) return; //刚开机
@@ -63,11 +63,12 @@ void cpu::do_ir()
 		}
 	}
 
-
+	
 	//如果时间片用完或发生阻塞，指向下一个块 重新调度 
-	if ((_os->run_pcb)->surplus == 0 || (_os->run_pcb)->status == BLOCK) {
-		(_os->run_pcb)->surplus = TIME;
-		(_os->run_pcb) = (_os->run_pcb)->next;
+	if ((_os->run_pcb)->surplus == 0 || (_os->run_pcb)->status == BLOCK || (_os->run_pcb)->status == FINISH) {
+		if((_os->run_pcb)->surplus == 0)
+			(_os->run_pcb)->surplus = TIME; //如果时间片用完 恢复时间片，其他情况下表示时间片已经设置好 不能重新设置时间片
+		(_os->run_pcb) = next;
 	}
 
 	//如果到达准备序列结尾 从头开始
