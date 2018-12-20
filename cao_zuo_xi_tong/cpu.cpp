@@ -5,6 +5,7 @@ using namespace std;
 
 cpu::cpu()
 {
+
 }
 
 void cpu::set_computer_status(bool if_run, os * os)
