@@ -31,6 +31,7 @@ public:
 	pcb* ready_pcb = NULL; //就绪队列
 	pcb* block_pcb = NULL; //阻塞队列
 	pcb* run_pcb = NULL; //正在运行的进程指针
+	pcb* finish_pcb = NULL; //已完成队列  调度用不到  只给图形界面用
 	int last_pid = 0; //最新的pid序号
 	int pid_num = 0; //pid个数
 	memory *mem = NULL;
@@ -43,6 +44,7 @@ public:
 	void set_now_process_status(int _status, int _reason, int _time); //设置当前运行的进程状态 实际使用中只用来供cpu调用设置成阻塞状态
 	void show_all_ready();
 	void show_all_block();
+	void show_all_finish();
 	char *read_id_reg(); //读取指令 从ir_reg开始读到 ; 并设置ir_reg后移 返回值为指令内容 注意无结束符0 所以用sizeof()判断长度
 	int move_finished_process(pcb* _pcb); //从ready中删除已完成进程
 	pcb* get_running_pcb(); //返回当前pcb指针

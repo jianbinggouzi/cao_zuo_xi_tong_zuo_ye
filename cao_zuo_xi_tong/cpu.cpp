@@ -44,6 +44,9 @@ void cpu::do_ir()
 	else if (strcmp(ir, "end;") == 0) {
 		_os->set_now_process_status(FINISH, END, 1);
 	}
+	else if (strcmp(ir, "gob;") == 0) {
+		pcb_now->ir_reg = pcb_now->ir_reg - 8;
+	}
 	else {
 		if (ir[1] == '=') {
 			pcb_now->data_reg = ir[2] - 48;

@@ -66,6 +66,7 @@ void os::dispatch()
 {
 	show_all_ready();
 	show_all_block();
+	show_all_finish();
 	//将阻塞队列内所有pcb时间片-1 如果阻塞时间片用完 唤醒该进程
 	pcb* p = block_pcb;	
 	while (p != NULL) {
@@ -95,8 +96,8 @@ void os::dispatch()
 	//一次读取一条指令
 	run_pcb->ir = read_id_reg();
 	if (run_pcb->pid == 0) {
-		run_pcb->ir = mem->mem + 0;
-		run_pcb->ir_reg = mem->mem + 0;
+		//run_pcb->ir = mem->mem + 0;
+		//run_pcb->ir_reg = mem->mem + 0;
 	}
 	printf("pid:%d读取到指令%s\n",run_pcb->pid, run_pcb->ir);		
 
@@ -123,6 +124,20 @@ int os::move_finished_process(pcb* _pcb)
 		p->next = p->next->next;
 
 	}
+
+	//添加到完成队列
+	pcb *p1 = finish_pcb;
+	_pcb->next = NULL;
+	if (finish_pcb == NULL) {
+		finish_pcb = _pcb;	
+	}
+	else {
+		while (p1->next != NULL) {
+			p1 = p1->next;
+		}
+		p1->next = _pcb;
+	}
+
 	return 1;
 }
 
@@ -235,13 +250,20 @@ void os::show_all_block()
 	}
 }
 
+void os::show_all_finish()
+{
+	pcb *p = finish_pcb;
+	printf("finish:\n");
+	while (p != NULL) {
+		printf("pid:%d,address:%p,status:%d,time:%d\n", p->pid, p->ir_reg, p->status, p->surplus);
+		p = p->next;
+	}
+}
+
 char * os::read_id_reg()
 {
 	int length = 1;
-	if (run_pcb->pid == 0) {
-		char t[] = "x=0;";
-		return t;
-	}
+	
 	show_all_ready();
 	show_all_block();
 	printf("pid = %d-----------------\n", run_pcb->pid);

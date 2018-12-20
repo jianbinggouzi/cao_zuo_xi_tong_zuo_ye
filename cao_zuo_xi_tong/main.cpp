@@ -38,16 +38,16 @@ int main() {
 	memory mem;
 	os _os(&mem);
 
-	_os.add_process( 20);
-	_os.add_process( 20);
-	_os.add_process( 20);
-	_os.add_process( 20);
-	_os.add_process( 20);
-	_os.add_process( 20);
 	_os.add_process(20);
 	_os.add_process(20);
 	_os.add_process(20);
-
+	_os.add_process(20);
+	_os.add_process(20);
+	_os.add_process(20);
+	_os.add_process(20);
+	_os.add_process(20);
+	_os.add_process(20);
+	_os.add_process(20);
 	
 	cpu _cpu;
 	_cpu.set_computer_status(true, &_os);
