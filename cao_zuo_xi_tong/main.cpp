@@ -14,6 +14,7 @@ int if_init = 0;
 void initDialog(HWND hDlg) {
 	if (if_init == 1)  return;
 	if_init = 1;
+	//初始化开关机键图标
 	HBITMAP bmp = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(IDB_BITMAP1));
 	HWND Button = GetDlgItem(hDlg, IDC_BUTTON1);
 	SetWindowLong(Button, GWL_STYLE, GetWindowLong(Button, GWL_STYLE) + BS_BITMAP);
@@ -68,6 +69,7 @@ LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		wmId = LOWORD(wParam);
 		switch (wmId) {
+			//点击开关机键
 			case IDC_BUTTON1:
 				if (_cpu.get_status() == false) {
 					DWORD CPUId = 0;
@@ -83,6 +85,7 @@ LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 					SendMessage(switchButton, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmp);
 				}
 				break;
+			//点击加载进程按钮
 			case 1004:
 				add_all_processes();
 				break;
