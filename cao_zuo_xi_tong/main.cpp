@@ -8,9 +8,12 @@ memory mem;
 os _os(&mem);
 cpu _cpu;
 
+int if_init = 0;
 
 //图形界面初始化
 void initDialog(HWND hDlg) {
+	if (if_init == 1)  return;
+	if_init = 1;
 	HBITMAP bmp = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(IDB_BITMAP1));
 	HWND Button = GetDlgItem(hDlg, IDC_BUTTON1);
 	SetWindowLong(Button, GWL_STYLE, GetWindowLong(Button, GWL_STYLE) + BS_BITMAP);
