@@ -163,6 +163,7 @@ void updateInterface(HWND hDlg) {
 		p3 = p3->next;
 	}
 
+
 	List = GetDlgItem(hDlg, 1031);
 	SendMessage(List, LB_RESETCONTENT, 0, 0);
 	p3 = _os.finish_pcb;
