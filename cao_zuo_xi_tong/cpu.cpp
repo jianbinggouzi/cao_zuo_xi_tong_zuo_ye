@@ -83,7 +83,7 @@ void cpu::do_ir()
 		
 		(_os->run_pcb)->status = RUN;
 	}
-	_sleep(100);
+	_sleep(200);
 }
 
 pcb * cpu::get_now_pcb()

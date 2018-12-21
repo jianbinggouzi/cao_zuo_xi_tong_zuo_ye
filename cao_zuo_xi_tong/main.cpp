@@ -135,7 +135,7 @@ void updateInterface(HWND hDlg) {
 	HWND List = GetDlgItem(hDlg, 1029);
 	SendMessage(List, LB_RESETCONTENT, 0, 0);
 	pcb *p3 = _os.ready_pcb;
-	char buffer[10];
+	char buffer[20];
 	while (p3 != NULL) {
 		memset(buffer, 0, 10);
 		sprintf(buffer, "pid=%d\n", p3->pid);
@@ -150,7 +150,7 @@ void updateInterface(HWND hDlg) {
 	p3 = _os.block_pcb;
 	while (p3 != NULL) {
 		memset(buffer, 0, 10);
-		sprintf(buffer, "pid=%d\n", p3->pid);
+		sprintf(buffer, "pid=%d remian:%d\n", p3->pid,p3->surplus);
 		if (p3->pid != 0) {
 			SendMessageA(List, LB_ADDSTRING, 0, (LPARAM)buffer);
 		}
