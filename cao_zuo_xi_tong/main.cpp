@@ -103,7 +103,7 @@ LRESULT CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 void updateInterface(HWND hDlg) {
 	HWND status;
 	pcb * now_pcb = _cpu.get_now_pcb();
-	if (now_pcb == NULL) return;
+	if (now_pcb == NULL || _cpu.get_status()==false) return;
 
 	//更新cpu状态
 	SetDlgItemInt(hDlg, IDC_NOW_PID, now_pcb->pid, FALSE);
@@ -138,9 +138,9 @@ void updateInterface(HWND hDlg) {
 	HWND List = GetDlgItem(hDlg, 1029);
 	SendMessage(List, LB_RESETCONTENT, 0, 0);
 	pcb *p3 = _os.ready_pcb;
-	char buffer[20];
+	char buffer[32];
 	while (p3 != NULL) {
-		memset(buffer, 0, 10);
+		memset(buffer, 0, 32);
 		sprintf(buffer, "pid=%d\n", p3->pid);
 		if (p3->pid != 0) {
 			SendMessageA(List, LB_ADDSTRING, 0, (LPARAM)buffer);
@@ -152,8 +152,8 @@ void updateInterface(HWND hDlg) {
 	SendMessage(List, LB_RESETCONTENT, 0, 0);
 	p3 = _os.block_pcb;
 	while (p3 != NULL) {
-		memset(buffer, 0, 10);
-		sprintf(buffer, "pid=%d remian:%d\n", p3->pid,p3->surplus);
+		memset(buffer, 0, 32);
+		sprintf(buffer, "pid=%d remian:%d reason:%c\n", p3->pid,p3->surplus,(p3->reason)+61);
 		if (p3->pid != 0) {
 			SendMessageA(List, LB_ADDSTRING, 0, (LPARAM)buffer);
 		}
@@ -165,7 +165,7 @@ void updateInterface(HWND hDlg) {
 	SendMessage(List, LB_RESETCONTENT, 0, 0);
 	p3 = _os.finish_pcb;
 	while (p3 != NULL) {
-		memset(buffer, 0, 10);
+		memset(buffer, 0, 32);
 		sprintf(buffer, "pid=%d\n", p3->pid);
 		if (p3->pid != 0) {
 			SendMessageA(List, LB_ADDSTRING, 0, (LPARAM)buffer);
@@ -201,6 +201,7 @@ static void WINAPI CreateInterface(void *arg) {
 
 int main() {
 	//创建主界面 放在线程里
+	printf("**********************开机后请最小化此窗口************************\n");
 	DWORD SurfaceId = 0;
 	HANDLE hThread1 = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)CreateInterface, NULL, 0, &SurfaceId);
 		
