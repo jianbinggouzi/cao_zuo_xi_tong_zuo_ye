@@ -7,7 +7,6 @@
 memory mem;
 os _os(&mem);
 cpu _cpu;
-
 int if_init = 0;
 
 //图形界面初始化
