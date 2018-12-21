@@ -169,7 +169,7 @@ void updateInterface(HWND hDlg) {
 	p3 = _os.finish_pcb;
 	while (p3 != NULL) {
 		memset(buffer, 0, 32);
-		sprintf(buffer, "pid=%d\n", p3->pid);
+		sprintf(buffer, "pid=%d result:%d\n", p3->pid,p3->data_reg);
 		if (p3->pid != 0) {
 			SendMessageA(List, LB_ADDSTRING, 0, (LPARAM)buffer);
 		}
