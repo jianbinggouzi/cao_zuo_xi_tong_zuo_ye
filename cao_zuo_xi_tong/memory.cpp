@@ -193,6 +193,7 @@ int memory::Length(char *str) {
 	//return sizeof(str);
 }
 
+
 int memory::write(int address, char * str)
 {
 	printf("传入的str:%s 长度%d", str, Length(str));

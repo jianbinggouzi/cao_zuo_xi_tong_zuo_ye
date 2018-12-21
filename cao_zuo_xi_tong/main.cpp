@@ -18,11 +18,7 @@ void initDialog(HWND hDlg) {
 	
 	//初始化内存块界面
 	bmp = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(IDB_BITMAP3));
-	DWORD i = 1035;
-	Button = GetDlgItem(hDlg, 1035);
-	SetWindowLong(Button, GWL_STYLE, GetWindowLong(Button, GWL_STYLE) + BS_BITMAP);
-	SendMessage(Button, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmp);
-	for (i = 1036; i <= 1162; i++) {
+	for (int i = 1035; i <= 1162; i++) {
 		Button = GetDlgItem(hDlg, i);
 		SetWindowLong(Button, GWL_STYLE, GetWindowLong(Button, GWL_STYLE) + BS_BITMAP);
 		SendMessage(Button, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmp);
@@ -105,10 +101,76 @@ void updateInterface(HWND hDlg) {
 	HWND status;
 	pcb * now_pcb = _cpu.get_now_pcb();
 	if (now_pcb == NULL) return;
+
+	//更新cpu状态
 	SetDlgItemInt(hDlg, IDC_NOW_PID, now_pcb->pid, FALSE);
 	SetDlgItemInt(hDlg, IDC_CPU_TIME, _cpu.get_cpu_time(), FALSE);
-	SetDlgItemText(hDlg, IDC_NOW_IR, (LPCWSTR)(_cpu.get_ir()));
+	SetDlgItemTextA(hDlg, IDC_NOW_IR, (LPCSTR)(_cpu.get_ir()));
 	SetDlgItemInt(hDlg, IDC_NOW_DR, _cpu.get_dr(),FALSE);
+
+	//更新内存块状态
+	//先全部恢复为起始状态
+	HBITMAP bmp = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(IDB_BITMAP3));
+	HWND Button = GetDlgItem(hDlg, 1035);
+	SendMessage(Button, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmp);
+	for (int i = 1035; i <= 1162; i++) {
+		Button = GetDlgItem(hDlg, i);
+		SendMessage(Button, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmp);
+	}
+	//重新上色
+	bmp = LoadBitmap(GetModuleHandle(0), MAKEINTRESOURCE(IDB_BITMAP4));
+	struct busy * p = mem.list.busy;
+	int p1, p2;
+	while (p != NULL) {
+		p1 = (p->head) / 4 + 1035;
+		p2 = (p->size) / 4 + (p->head) / 4 + 1034;
+		for (int i = p1; i <= p2; i++) {
+			Button = GetDlgItem(hDlg, i);
+			SendMessage(Button, BM_SETIMAGE, IMAGE_BITMAP, (LPARAM)bmp);
+		}
+		p = p->next;
+	}
+
+	//更新三个列表 先清空 再添加数据
+	HWND List = GetDlgItem(hDlg, 1029);
+	SendMessage(List, LB_RESETCONTENT, 0, 0);
+	pcb *p3 = _os.ready_pcb;
+	char buffer[10];
+	while (p3 != NULL) {
+		memset(buffer, 0, 10);
+		sprintf(buffer, "pid=%d\n", p3->pid);
+		if (p3->pid != 0) {
+			SendMessageA(List, LB_ADDSTRING, 0, (LPARAM)buffer);
+		}
+		p3 = p3->next;
+	}
+
+	List = GetDlgItem(hDlg, 1030);
+	SendMessage(List, LB_RESETCONTENT, 0, 0);
+	p3 = _os.block_pcb;
+	while (p3 != NULL) {
+		memset(buffer, 0, 10);
+		sprintf(buffer, "pid=%d\n", p3->pid);
+		if (p3->pid != 0) {
+			SendMessageA(List, LB_ADDSTRING, 0, (LPARAM)buffer);
+		}
+		p3 = p3->next;
+	}
+
+
+	List = GetDlgItem(hDlg, 1031);
+	SendMessage(List, LB_RESETCONTENT, 0, 0);
+	p3 = _os.finish_pcb;
+	while (p3 != NULL) {
+		memset(buffer, 0, 10);
+		sprintf(buffer, "pid=%d\n", p3->pid);
+		if (p3->pid != 0) {
+			SendMessageA(List, LB_ADDSTRING, 0, (LPARAM)buffer);
+		}
+		p3 = p3->next;
+	}
+
+	
 	
 }
 

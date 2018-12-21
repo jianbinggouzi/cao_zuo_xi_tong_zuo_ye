@@ -14,8 +14,11 @@
 #define IDC_CPU_MENU                    1009
 #define IDC_BUTTON131                   1028
 #define IDC_LIST1                       1029
+#define IDC_LIST_READY                  1029
 #define IDC_LIST2                       1030
+#define IDC_LIST_BLOCK                  1030
 #define IDC_LIST3                       1031
+#define IDC_LIST_FINISH                 1031
 #define IDC_NOW_PID                     1032
 #define IDC_CPU_TIME                    1033
 #define IDC_NOW_IR                      1034

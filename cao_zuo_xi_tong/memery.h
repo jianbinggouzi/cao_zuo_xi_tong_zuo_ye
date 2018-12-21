@@ -37,5 +37,5 @@ public:
 	int busy_list();
 	int free_list();
 	int Length(char *);
-
+	
 };
