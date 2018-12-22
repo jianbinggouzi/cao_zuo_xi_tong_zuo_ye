@@ -35,6 +35,7 @@ public:
 	int last_pid = 0; //最新的pid序号
 	int pid_num = 0; //pid个数
 	memory *mem = NULL;
+	int not_read = 0; //给前台使用
 
 	os(memory *_mem); //完成初始化
 	int add_process(int size); //添加新进程 size为所需内存大小 返回pid

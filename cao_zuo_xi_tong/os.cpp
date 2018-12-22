@@ -70,7 +70,30 @@ void os::dispatch()
 	mem->busy_list();
 	mem->free_list();
 
-	//将阻塞队列内所有pcb时间片-1 如果阻塞时间片用完 唤醒该进程
+	pcb *next = (run_pcb)->next;
+	//如果时间片用完或发生阻塞，指向下一个块 重新调度 
+	if ((run_pcb)->surplus == 0 || (run_pcb)->status == BLOCK || (run_pcb)->status == FINISH) {
+		if ((run_pcb)->surplus == 0)
+			(run_pcb)->surplus = TIME; //如果时间片用完 恢复时间片，其他情况下表示时间片已经设置好 不能重新设置时间片
+		(run_pcb) = next;
+	}
+
+
+	//如果到达准备序列结尾 从头开始 如果有其他进程 调度其他进程 否则运行闲逛进程
+	if ((run_pcb) == NULL) {
+		(run_pcb) = ready_pcb;
+		
+		(run_pcb)->status = RUN;
+	}
+
+	if (run_pcb->pid == 0 && ready_pcb->next != NULL) {
+		not_read = 1;
+	}
+	else {
+		not_read = 0;
+	}
+
+	//将阻塞队列内所有pcb时间片-1 如果阻塞时间片用完 唤醒该进程 此时立即执行此进程
 	pcb* p = block_pcb;	
 	while (p != NULL) {
 		printf("检查阻塞：当前pid = %d .time = %d", p->pid, p->surplus);
@@ -79,6 +102,8 @@ void os::dispatch()
 		if (p->surplus <= 0) {
 			printf("发现pid = %d时间片用完", p->pid);
 			move_block_process(p);
+			run_pcb = p;
+			break;
 		}
 
 		p = p->next;
@@ -93,17 +118,23 @@ void os::dispatch()
 		}
 		p1 = p1->next;
 	}
-	
+	//如果当前进程完成 立即调度
+	if (run_pcb->status == FINISH) {
+		if (next == NULL) {
+			run_pcb = ready_pcb;
+		}
+		else {
+			run_pcb = next;
+		}
+	}
+
 	//时间片-1
 	run_pcb->surplus--;
 	//一次读取一条指令
 	run_pcb->ir = read_id_reg();
-	if (run_pcb->pid == 0) {
-		//run_pcb->ir = mem->mem + 0;
-		//run_pcb->ir_reg = mem->mem + 0;
-	}
+	
 	printf("pid:%d读取到指令%s\n",run_pcb->pid, run_pcb->ir);		
-
+	
 	
 
 }

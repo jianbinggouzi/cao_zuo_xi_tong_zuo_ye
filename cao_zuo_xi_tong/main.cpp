@@ -108,6 +108,7 @@ void updateInterface(HWND hDlg) {
 	if (now_pcb == NULL || _cpu.get_status()==false) return;
 
 	//¸üÐÂcpu×´Ì¬
+	if (_os.not_read == 1) return;
 	SetDlgItemInt(hDlg, IDC_NOW_PID, now_pcb->pid, FALSE);
 	SetDlgItemInt(hDlg, IDC_CPU_TIME, _cpu.get_cpu_time(), FALSE);
 	SetDlgItemTextA(hDlg, IDC_NOW_IR, (LPCSTR)(_cpu.get_ir()));
