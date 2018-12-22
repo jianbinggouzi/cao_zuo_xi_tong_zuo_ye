@@ -61,7 +61,7 @@ void cpu::do_ir()
 
 			}
 			else if (ir[1] == 'B') {
-				_os->add_block_process(pcb_now, A, time);
+				_os->add_block_process(pcb_now, B, time);
 			}
 		}
 		else {
